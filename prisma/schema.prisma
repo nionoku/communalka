@@ -1,0 +1,22 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model GS_Accruals {
+  id           Int      @id @default(autoincrement())
+  accrual_id   String   @unique
+  status       String
+  accrual_date String
+  receipt_path String
+  area         String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
