@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "task:fill-manually-gs-accruals": "node -r ts-node/register src/scripts/fill-manually-gs-accruals.ts 2024-04-01"
+    "task:fill-manually-gs-accruals": "node -r ts-node/register src/scripts/fill-manually-gs-accruals.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

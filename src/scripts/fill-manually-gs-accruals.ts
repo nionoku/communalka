@@ -1,21 +1,26 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AccrualsModule } from '../gs/accruals/accruals.module';
-import { AccrualsService } from '../gs/accruals/accruals.service';
+import { HandleAccrualsService } from '../gs/accruals/handle-accruals/handle-accruals.service';
 
 async function task() {
-  const app = await NestFactory.createApplicationContext(AccrualsModule);
-  const service = app.get(AccrualsService);
-  const logger = new Logger(AccrualsService.name);
+  const logger = new Logger(HandleAccrualsService.name);
 
   const from = new Date(process.argv[2]);
   const till = new Date();
 
+  if (isNaN(from.getTime())) {
+    throw new Error('Incorrect 1 argument: Should be date from');
+  }
+
+  const app = await NestFactory.createApplicationContext(AccrualsModule);
+  const service = app.get(HandleAccrualsService);
   const result = await service.fetchAccruals(from, till);
 
-  logger.log(
-    `Success getting ${result.length} accuals records from id ${result.at(0).id}`,
-  );
+  const message = result.length
+    ? `Success getting ${result.length} accuals records from id ${result.at(0).id}`
+    : `Accruals by period is empty`;
+  logger.log(message);
 
   await app.close();
 }

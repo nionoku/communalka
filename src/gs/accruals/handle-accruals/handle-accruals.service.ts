@@ -1,28 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
-import { getSessions } from '../utils/sessions';
-import { Api } from './api/api';
-import { DbService } from './db/db.service';
-import { HandleAccruals } from './handle-accruals/handle-accruals';
+import { getSessions } from '../../utils/sessions';
+import { Api } from '../api/api';
+import { DbService } from '../db/db.service';
+import { HandleAccruals } from './handle-accruals';
 
 @Injectable()
-export class AccrualsService {
+export class HandleAccrualsService {
   constructor(private databaseService: DbService) {}
 
-  private readonly logger = new Logger(AccrualsService.name);
-
-  @Cron('0 0 12 * * *')
-  private async checkAccrualsDaily() {
-    this.logger.log(`Start daily check accruasl cron`);
-
-    const now = new Date();
-    // first day of previous month
-    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    // last day of current month
-    const till = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    return this.fetchAccruals(from, till);
-  }
+  private readonly logger = new Logger(HandleAccrualsService.name);
 
   fetchAccruals(from: Date, till: Date) {
     this.logger.log(

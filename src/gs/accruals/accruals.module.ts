@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AccrualsService } from './accruals.service';
-import { ScheduleModule } from '@nestjs/schedule';
-import { ConfigModule } from '@nestjs/config';
-import { DbModule } from './db/db.module';
+import { HandleAccrualsModule } from './handle-accruals/handle-accruals.module';
+import { CronModule } from './cron/cron.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), ConfigModule.forRoot(), DbModule],
-  providers: [AccrualsService],
+  imports: [HandleAccrualsModule, CronModule],
 })
 export class AccrualsModule {}
