@@ -1,18 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { access, writeFile } from 'fs/promises';
+import { AccrualDto } from '../accrual.dto';
 import {
   Api,
   AccuralResponse,
   GenerateAccuralReceiptResponse,
   CheckIsGeneratedAccuralReceiptResponse,
-} from 'src/gs/accruals/api/api';
-
-type DocumentCallbackMessage = {
-  id: string;
-  date: string;
-  status: AccuralResponse['accruals'][number]['status'];
-  receiptPath?: string;
-};
+} from '../api/api';
 
 export class HandleAccruals {
   constructor(
@@ -23,14 +17,14 @@ export class HandleAccruals {
 
   private logger = new Logger(HandleAccruals.name);
 
-  async start(): Promise<DocumentCallbackMessage[]> {
+  async start(): Promise<AccrualDto[]> {
     return this.fetchAccrualsAndHandle(this.from, this.till);
   }
 
   private async fetchAccrualsAndHandle(
     from: Date,
     till: Date,
-  ): Promise<DocumentCallbackMessage[]> {
+  ): Promise<AccrualDto[]> {
     this.logger.log(
       `Fetching accruals from ${from.toISOString().split('T').at(0)} till ${till.toISOString().split('T').at(0)}`,
     );
@@ -57,13 +51,13 @@ export class HandleAccruals {
 
   private async handleAccural(
     document: AccuralResponse['accruals'][number],
-  ): Promise<DocumentCallbackMessage> {
+  ): Promise<AccrualDto> {
     const documentDate = document.month.split('T').at(0);
 
     if (!document.allow_pdf) {
       return {
-        id: document.accrual_id,
-        date: documentDate,
+        accrual_id: document.accrual_id,
+        accrual_date: documentDate,
         status: document.status,
       };
     }
@@ -84,33 +78,54 @@ export class HandleAccruals {
     }
 
     return {
-      id: document.accrual_id,
-      date: documentDate,
+      accrual_id: document.accrual_id,
+      accrual_date: documentDate,
       status: document.status,
-      receiptPath,
+      receipt_path: receiptPath,
     };
   }
 
   private async waitGenerateAccuralReceipt(
     receiptTaskInfo: GenerateAccuralReceiptResponse,
   ) {
-    return new Promise<URLSearchParams>(async (resolve) => {
-      // TODO (2024.05.04): limit requests count
-      const timerId = setInterval(async () => {
-        const response = await this.api
-          .checkIsGeneratedAccuralReceipt(receiptTaskInfo)
-          .then(
-            (it) =>
-              it.json() as Promise<CheckIsGeneratedAccuralReceiptResponse>,
+    return new Promise<URLSearchParams>(async (resolve, reject) => {
+      const retriesCount = 5;
+      const retriesTimeout = 5000;
+
+      const run = (retries: number) => {
+        return setTimeout(async () => {
+          this.logger.log(
+            `Try check generate accrual receipt with task id ${receiptTaskInfo.task_id}...`,
           );
 
-        if (response.status === 'success') {
-          const query = new URLSearchParams(response.url);
-          resolve(query);
+          const response = await this.api
+            .checkIsGeneratedAccuralReceipt(receiptTaskInfo)
+            .then(
+              (it) =>
+                it.json() as Promise<CheckIsGeneratedAccuralReceiptResponse>,
+            );
 
-          clearInterval(timerId);
-        }
-      }, 5000);
+          if (response.status === 'success') {
+            const query = new URLSearchParams(response.url.split('?').at(1));
+
+            if (!query.get('file_id')) {
+              throw reject(
+                `Failed getting generated accrual, 'file_id' is undefined`,
+              );
+            }
+
+            this.logger.log(
+              `Receipt with task id ${receiptTaskInfo.task_id} success generated, file id ${query.get('file_id')}`,
+            );
+
+            resolve(query);
+          } else if (retries > 0) {
+            return run(retries - 1);
+          }
+        }, retriesTimeout);
+      };
+
+      return run(retriesCount);
     });
   }
 

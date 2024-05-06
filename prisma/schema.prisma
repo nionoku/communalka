@@ -15,7 +15,7 @@ model GS_Accruals {
   accrual_id   String   @unique
   status       String
   accrual_date String
-  receipt_path String
+  receipt_path String?
   area         String
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt

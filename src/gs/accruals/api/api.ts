@@ -1,4 +1,4 @@
-import use from 'src/lib/scope-extensions';
+import use from '../../../lib/scope-extensions';
 import { makeCookiesString } from '../../../utils/cookies';
 
 export interface AccuralResponse {
