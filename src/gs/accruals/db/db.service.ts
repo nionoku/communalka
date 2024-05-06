@@ -22,4 +22,15 @@ export class DbService {
       },
     });
   }
+
+  updateStatus(accrual: AccrualDto) {
+    return this.prismaService.gS_Accruals.update({
+      data: {
+        status: accrual.status,
+      },
+      where: {
+        accrual_id: accrual.accrual_id,
+      },
+    });
+  }
 }

@@ -21,14 +21,18 @@ export class HandleAccrualsService {
       const api = new Api(id);
       const documents = await new HandleAccruals(api, from, till).start();
 
-      const records = documents.map((document) => {
-        const existRecord = this.databaseService.exist(document);
+      const records = documents.map(async (document) => {
+        const existRecord = await this.databaseService.exist(document);
 
-        if (existRecord) {
-          return existRecord;
+        if (!existRecord) {
+          return this.databaseService.save(document, area);
         }
 
-        return this.databaseService.save(document, area);
+        if (existRecord.status !== document.status) {
+          return this.databaseService.updateStatus(document);
+        }
+
+        return existRecord;
       });
 
       return Promise.all(records);
