@@ -1,10 +1,23 @@
 import { Module } from '@nestjs/common';
 import { GsModule } from './gs/gs.module';
-import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
+import { TelegrafModule } from 'nestjs-telegraf';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { GlobalModule } from './global.module';
 
 @Module({
-  imports: [TelegramBotModule, GsModule],
+  imports: [
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
+    TelegrafModule.forRoot({
+      token: process.env.TELEGRAM_BOT_TOKEN,
+    }),
+
+    GsModule,
+
+    GlobalModule,
+  ],
   controllers: [],
-  providers: [],
+  exports: [],
 })
 export class AppModule {}

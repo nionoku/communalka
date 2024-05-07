@@ -4,6 +4,7 @@ type Record = {
   id: string;
   area: string;
   from: string;
+  chat: number;
 };
 
 const getSessions = () => {
@@ -11,8 +12,7 @@ const getSessions = () => {
     .let<Record[]>(JSON.parse)
     .item()
     .map((session) => ({
-      id: session.id,
-      area: session.area,
+      ...session,
       from: new Date(session.from),
     }));
 };
