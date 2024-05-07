@@ -7,6 +7,7 @@ import {
   GenerateAccuralReceiptResponse,
   CheckIsGeneratedAccuralReceiptResponse,
 } from '../api/api';
+import { exec } from 'child_process';
 
 export class HandleAccruals {
   constructor(
@@ -63,6 +64,7 @@ export class HandleAccruals {
     }
 
     const receiptPath = `documents/${documentDate}_${document.accrual_id}.pdf`;
+    const qrReceiptPath = `documents-qr/${documentDate}_${document.accrual_id}.png`;
 
     this.logger.log(
       `Start handle accrual document with id ${document.accrual_id} at ${documentDate}`,
@@ -74,7 +76,9 @@ export class HandleAccruals {
       this.logger.log(`Accrual document ${receiptPath} already exist`);
     } catch (err) {
       // save file locally when not exist
-      this.saveDocumentLocally(document.accrual_id, receiptPath);
+      this.saveDocumentLocally(document.accrual_id, receiptPath).then(() =>
+        this.cropQRCodeFromDocument(receiptPath, qrReceiptPath),
+      );
     }
 
     return {
@@ -126,6 +130,30 @@ export class HandleAccruals {
       };
 
       return run(retriesCount);
+    });
+  }
+
+  private async cropQRCodeFromDocument(documentPath: string, path: string) {
+    return new Promise((resolve, reject) => {
+      const cropImageTask = `
+        convert ${documentPath} \
+          -crop 102x102+433+27 \
+          -scale 300% \
+          ${path}
+      `;
+
+      return exec(cropImageTask, (err) => {
+        if (err) {
+          this.logger.error(
+            `Cant crop QR from ${documentPath}, reason: ${err.message}`,
+          );
+
+          return reject();
+        }
+
+        this.logger.log(`Cropped QR from ${documentPath} saved to ${path}`);
+        return resolve(path);
+      });
     });
   }
 

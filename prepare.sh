@@ -1,6 +1,12 @@
 # Create documents directory
 mkdir documents
 
+# Create QR-codes of documents
+mkdir documents-qr
+
+# ImageMagick required for crop qr-code
+sudo apt install imagemagick
+
 # Create db directory
 mkfir db
 
