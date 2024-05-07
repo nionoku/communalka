@@ -3,7 +3,7 @@ import { GsModule } from './gs/gs.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 
 @Module({
-  imports: [GsModule, TelegramBotModule],
+  imports: [TelegramBotModule, GsModule],
   controllers: [],
   providers: [],
 })

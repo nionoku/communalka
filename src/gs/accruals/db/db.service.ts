@@ -6,6 +6,14 @@ import { AccrualDto } from '../accrual.dto';
 export class DbService {
   constructor(private prismaService: PrismaService) {}
 
+  debts() {
+    return this.prismaService.gS_Accruals.findMany({
+      where: {
+        status: 'debt',
+      },
+    });
+  }
+
   exist(accrual: AccrualDto) {
     return this.prismaService.gS_Accruals.findUnique({
       where: {

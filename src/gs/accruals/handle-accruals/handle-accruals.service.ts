@@ -10,6 +10,10 @@ export class HandleAccrualsService {
 
   private readonly logger = new Logger(HandleAccrualsService.name);
 
+  getDebts() {
+    return this.databaseService.debts();
+  }
+
   fetchAccruals(from: Date, till: Date) {
     this.logger.log(
       `Start task for getting accruals from ${from.toISOString().split('T').at(0)} till ${till.toISOString().split('T').at(0)}`,
