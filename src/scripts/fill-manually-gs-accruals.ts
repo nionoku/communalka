@@ -1,10 +1,10 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AccrualsModule } from '../gs/accruals/accruals.module';
-import { HandleAccrualsService } from '../gs/accruals/handle-accruals/handle-accruals.service';
+import { ProcessService } from '../gs/accruals/process/process.service';
 
 async function task() {
-  const logger = new Logger(HandleAccrualsService.name);
+  const logger = new Logger(ProcessService.name);
 
   const from = new Date(process.argv[2]);
   const till = new Date();
@@ -14,7 +14,7 @@ async function task() {
   }
 
   const app = await NestFactory.createApplicationContext(AccrualsModule);
-  const service = app.get(HandleAccrualsService);
+  const service = app.get(ProcessService);
   const result = await service.fetchAccruals(from, till);
 
   const message = result.length

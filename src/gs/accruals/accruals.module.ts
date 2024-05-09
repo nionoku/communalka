@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CronModule } from './cron/cron.module';
-import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
+import { BotModule } from './bot/bot.module';
 
 @Module({
-  imports: [CronModule, TelegramBotModule],
+  imports: [CronModule, BotModule],
 })
 export class AccrualsModule {}

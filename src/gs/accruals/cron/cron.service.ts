@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { HandleAccrualsService } from '../handle-accruals/handle-accruals.service';
+import { ProcessService } from '../process/process.service';
 
 @Injectable()
 export class CronService {
-  constructor(private accrualsService: HandleAccrualsService) {}
+  constructor(private accrualsService: ProcessService) {}
 
   private readonly logger = new Logger(CronService.name);
 

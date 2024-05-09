@@ -6,7 +6,7 @@ import { GS_Accruals } from '@prisma/client';
 
 @Update()
 @Injectable()
-export class TelegramBotService {
+export class BotService {
   constructor(
     @InjectBot()
     private bot: Telegraf<Context>,
@@ -14,7 +14,7 @@ export class TelegramBotService {
     private databaseService: DbService,
   ) {}
 
-  private readonly logger = new Logger(TelegramBotService.name);
+  private readonly logger = new Logger(BotService.name);
 
   async notifyAboutDebts(documents: GS_Accruals[], chatId: number) {
     // TODO (2024.05.07): Add button to notify is paid

@@ -1,23 +1,23 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Api } from '../api/api';
 import { DbService } from '../db/db.service';
-import { HandleAccruals } from './handle-accruals';
-import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
+import { Process } from './process';
+import { BotService } from '../bot/bot.service';
 import { SESSIONS } from '../../../constants';
 import { Account } from '@prisma/client';
 
 @Injectable()
-export class HandleAccrualsService {
+export class ProcessService {
   constructor(
     @Inject(SESSIONS)
     private sessions: Account[],
 
     private databaseService: DbService,
 
-    private telegramBotService: TelegramBotService,
+    private telegramBotService: BotService,
   ) {}
 
-  private readonly logger = new Logger(HandleAccrualsService.name);
+  private readonly logger = new Logger(ProcessService.name);
 
   async fetchAccruals(from: Date, till: Date) {
     this.logger.log(
@@ -29,7 +29,7 @@ export class HandleAccrualsService {
         this.logger.log(`Start task for getting accruals for area ${area}`);
 
         const api = new Api(gs_session);
-        const documents = await new HandleAccruals(api, from, till).start();
+        const documents = await new Process(api, from, till).start();
 
         const records = documents.map(async (document) => {
           const existRecord = await this.databaseService.exist(document);

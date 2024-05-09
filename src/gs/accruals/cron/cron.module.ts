@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { CronService } from './cron.service';
-import { HandleAccrualsModule } from '../handle-accruals/handle-accruals.module';
+import { ProcessModule } from '../process/process.module';
 
 @Module({
-  imports: [HandleAccrualsModule],
+  imports: [ProcessModule],
   providers: [CronService],
 })
 export class CronModule {}

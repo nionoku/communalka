@@ -9,14 +9,14 @@ import {
 } from '../api/api';
 import { exec } from 'child_process';
 
-export class HandleAccruals {
+export class Process {
   constructor(
     private api: Api,
     private from: Date,
     private till: Date,
   ) {}
 
-  private logger = new Logger(HandleAccruals.name);
+  private logger = new Logger(Process.name);
 
   async start(): Promise<AccrualDto[]> {
     return this.fetchAccrualsAndHandle(this.from, this.till);
