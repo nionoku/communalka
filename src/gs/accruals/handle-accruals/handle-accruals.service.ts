@@ -1,16 +1,14 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { getSessions } from '../../utils/sessions';
+import { Injectable, Logger } from '@nestjs/common';
 import { Api } from '../api/api';
 import { DbService } from '../db/db.service';
 import { HandleAccruals } from './handle-accruals';
 import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
-import { SESSIONS } from '../../../constants';
+import { AccountService } from '../../../account/account.service';
 
 @Injectable()
 export class HandleAccrualsService {
   constructor(
-    @Inject(SESSIONS)
-    private sessions: ReturnType<typeof getSessions>,
+    private accountService: AccountService,
 
     private databaseService: DbService,
 
@@ -19,52 +17,56 @@ export class HandleAccrualsService {
 
   private readonly logger = new Logger(HandleAccrualsService.name);
 
-  fetchAccruals(from: Date, till: Date) {
+  async fetchAccruals(from: Date, till: Date) {
     this.logger.log(
       `Start task for getting accruals from ${from.toISOString().split('T').at(0)} till ${till.toISOString().split('T').at(0)}`,
     );
 
-    const tasks = this.sessions.map(async ({ id, area, chat }, index) => {
-      this.logger.log(`Start task for getting accruals for area ${area}`);
+    const accounts = await this.accountService.accounts();
 
-      const api = new Api(id);
-      const documents = await new HandleAccruals(api, from, till).start();
+    const tasks = accounts.map(
+      async ({ gs_session, area, notify_to }, index) => {
+        this.logger.log(`Start task for getting accruals for area ${area}`);
 
-      const records = documents.map(async (document) => {
-        const existRecord = await this.databaseService.exist(document);
+        const api = new Api(gs_session);
+        const documents = await new HandleAccruals(api, from, till).start();
 
-        if (!existRecord) {
-          return this.databaseService.save(document, area);
-        }
+        const records = documents.map(async (document) => {
+          const existRecord = await this.databaseService.exist(document);
 
-        if (existRecord.status !== document.status) {
-          return this.databaseService.updateStatus(document);
-        }
+          if (!existRecord) {
+            return this.databaseService.save(document, area);
+          }
 
-        return existRecord;
-      });
+          if (existRecord.status !== document.status) {
+            return this.databaseService.updateStatus(document);
+          }
 
-      const completedRecords = await Promise.all(records)
-        .then((records) => {
-          this.logger.log(
-            `Handled ${records.length} records of accruals for [${index}] session`,
-          );
-
-          return records;
-        })
-        .catch((reason) => {
-          throw new Error(
-            `Can't handled records of accruals for [${index}] session, reason: ${reason}`,
-          );
+          return existRecord;
         });
 
-      await this.telegramBotService.notifyAboutDebts(
-        completedRecords.filter((document) => document.status === 'debt'),
-        chat,
-      );
+        const completedRecords = await Promise.all(records)
+          .then((records) => {
+            this.logger.log(
+              `Handled ${records.length} records of accruals for [${index}] session`,
+            );
 
-      return completedRecords;
-    });
+            return records;
+          })
+          .catch((reason) => {
+            throw new Error(
+              `Can't handled records of accruals for [${index}] session, reason: ${reason}`,
+            );
+          });
+
+        await this.telegramBotService.notifyAboutDebts(
+          completedRecords.filter((document) => document.status === 'debt'),
+          notify_to,
+        );
+
+        return completedRecords;
+      },
+    );
 
     return Promise.all(tasks).then((records) => records.flat());
   }

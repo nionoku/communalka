@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { HandleAccrualsService } from './handle-accruals.service';
-import { DbModule } from '../db/db.module';
 import { TelegramBotModule } from '../telegram-bot/telegram-bot.module';
+import { AccountService } from '../../../account/account.service';
 
 @Module({
-  imports: [DbModule, TelegramBotModule],
-  providers: [HandleAccrualsService],
+  imports: [TelegramBotModule],
+  providers: [AccountService, HandleAccrualsService],
   exports: [HandleAccrualsService],
 })
 export class HandleAccrualsModule {}
