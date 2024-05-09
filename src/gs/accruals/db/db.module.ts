@@ -4,6 +4,6 @@ import { DbService } from './db.service';
 
 @Module({
   providers: [PrismaService, DbService],
-  exports: [PrismaService, DbService],
+  exports: [DbService],
 })
 export class DbModule {}

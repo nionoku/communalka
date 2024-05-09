@@ -13,9 +13,9 @@ import { GlobalModule } from './global.module';
       token: process.env.TELEGRAM_BOT_TOKEN,
     }),
 
-    GsModule,
-
     GlobalModule,
+
+    GsModule,
   ],
   controllers: [],
   exports: [],

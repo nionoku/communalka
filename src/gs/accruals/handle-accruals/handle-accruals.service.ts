@@ -1,14 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Api } from '../api/api';
 import { DbService } from '../db/db.service';
 import { HandleAccruals } from './handle-accruals';
 import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
-import { AccountService } from '../../../account/account.service';
+import { SESSIONS } from '../../../constants';
+import { Account } from '@prisma/client';
 
 @Injectable()
 export class HandleAccrualsService {
   constructor(
-    private accountService: AccountService,
+    @Inject(SESSIONS)
+    private sessions: Account[],
 
     private databaseService: DbService,
 
@@ -22,9 +24,7 @@ export class HandleAccrualsService {
       `Start task for getting accruals from ${from.toISOString().split('T').at(0)} till ${till.toISOString().split('T').at(0)}`,
     );
 
-    const accounts = await this.accountService.accounts();
-
-    const tasks = accounts.map(
+    const tasks = this.sessions.map(
       async ({ gs_session, area, notify_to }, index) => {
         this.logger.log(`Start task for getting accruals for area ${area}`);
 

@@ -10,13 +10,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id         Int    @id @default(autoincrement())
+  area       Int
+  gs_session String
+  notify_to  Int
+}
+
 model GS_Accruals {
   id           Int      @id @default(autoincrement())
   accrual_id   String   @unique
-  status       String
+  status       String // debt | paid
   accrual_date String
   receipt_path String?
-  area         String
+  area         Int
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 }

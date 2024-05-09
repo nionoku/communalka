@@ -22,7 +22,7 @@ export class DbService {
     });
   }
 
-  save(accrual: AccrualDto, area: string) {
+  save(accrual: AccrualDto, area: number) {
     return this.prismaService.gS_Accruals.create({
       data: {
         ...accrual,

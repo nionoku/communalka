@@ -1,13 +1,18 @@
 import { Global, Module } from '@nestjs/common';
 import { SESSIONS } from './constants';
-import { getSessions } from './gs/utils/sessions';
+import { AccountService } from './account/account.service';
+import { AccountModule } from './account/account.module';
 
 @Global()
 @Module({
+  imports: [AccountModule],
   providers: [
     {
       provide: SESSIONS,
-      useValue: getSessions(),
+      useFactory(accountService: AccountService) {
+        return accountService.accounts();
+      },
+      inject: [AccountService],
     },
   ],
   exports: [SESSIONS],
