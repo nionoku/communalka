@@ -2,9 +2,10 @@ import { DeviceDto } from '../../device.dto';
 
 type MeterWizardState = {
   devices: DeviceDto[];
-  session: string;
 
   currentDevice?: DeviceDto;
+
+  onComplete: (devices: DeviceDto[]) => Promise<unknown>;
 };
 
 export { MeterWizardState };

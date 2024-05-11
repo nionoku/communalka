@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Ctx, Wizard, WizardStep } from 'nestjs-telegraf';
 import { Scenes } from 'telegraf';
 import { MeterWizardState } from './meter-wizard.dto';
-import { ProcessService } from '../../process/process.service';
 import { DeviceDto } from '../../device.dto';
 
 const USE_MONTH_MIDDLE_VALUE_MESSAGE = '📈Применить среднемесячное потребление';
@@ -12,8 +11,6 @@ const USE_MONTH_MIDDLE_VALUE_MESSAGE = '📈Применить среднеме�
 @Injectable()
 @Wizard('meter')
 export class MeterWizardService {
-  constructor(private processService: ProcessService) {}
-
   private readonly logger = new Logger(MeterWizardService.name);
 
   @WizardStep(1)
@@ -38,9 +35,7 @@ export class MeterWizardService {
     );
 
     if (!device) {
-      // send meter readings to the server
-      await this.processService.sendMeterReadings(devicesList, state.session);
-
+      await state.onComplete(devicesList);
       // TODO (2024.05.11): Add submit button for process values
       await ctx.reply('Показания счетчиков приняты и отправлены на обработку');
       await ctx.scene.leave();
@@ -79,6 +74,7 @@ export class MeterWizardService {
               },
             ],
           ],
+          resize_keyboard: true,
         },
       },
     );

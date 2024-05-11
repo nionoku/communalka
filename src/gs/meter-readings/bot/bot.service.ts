@@ -47,17 +47,22 @@ export class BotService {
     this.logger.log(`Start handle meter reading for area ${ctx.match[1]}`);
 
     const devices = await this.processService
-      .listOfDevices(session.gs_session)
+      .listOfDevices(session)
       .then((devices) => devices.map((device) => device.toDto()));
 
     this.logger.log(
       `Handle ${devices.length} devices for area ${ctx.match[1]}`,
     );
 
+    // hide loader
+    await ctx.answerCbQuery('test');
+
     ctx.scene.enter('meter', {
       devices,
-      // required for send information
-      session: session.gs_session,
+      onComplete: (devices) => {
+        // send meter readings to the server
+        return this.processService.sendMeterReadings(devices, session);
+      },
     } satisfies MeterWizardState);
   }
 }
