@@ -7,7 +7,7 @@ export interface GetMeters {
 
 export interface MeterValue {
   id: string;
-  type: string;
+  type: 'ColdWaterAreaMeter' | 'HotWaterAreaMeter' | 'HeatAreaMeter';
   serial_number: string;
   location: string;
   installation_date: string;
@@ -72,7 +72,7 @@ class Api {
     return fetch(url, {
       ...options,
       headers: {
-        ...options.headers,
+        ...options?.headers,
         cookie: cookies,
       },
     });

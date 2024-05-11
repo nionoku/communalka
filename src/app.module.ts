@@ -4,6 +4,7 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GlobalModule } from './global.module';
+import { session } from 'telegraf';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { GlobalModule } from './global.module';
     ScheduleModule.forRoot(),
     TelegrafModule.forRoot({
       token: process.env.TELEGRAM_BOT_TOKEN,
+      middlewares: [session()],
     }),
 
     GlobalModule,
@@ -19,5 +21,6 @@ import { GlobalModule } from './global.module';
   ],
   controllers: [],
   exports: [],
+  providers: [],
 })
 export class AppModule {}
