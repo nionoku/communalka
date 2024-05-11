@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Api, GetMeters, Meter } from '../api/api';
 import { Device, DeviceDto } from '../device.dto';
+import { DbService } from '../db/db.service';
+import { Account } from '@prisma/client';
 
 @Injectable()
 export class ProcessService {
-  constructor() {}
+  constructor(private databaseService: DbService) {}
 
-  async listOfDevices(session: string) {
-    const api = new Api(session);
+  async listOfDevices(account: Account) {
+    const api = new Api(account.gs_session);
 
     return (
       api
@@ -21,13 +23,17 @@ export class ProcessService {
     );
   }
 
-  async sendMeterReadings(devices: DeviceDto[], session: string) {
-    const api = new Api(session);
+  async sendMeterReadings(devices: DeviceDto[], account: Account) {
+    const api = new Api(account.gs_session);
 
-    const meters = devices.map<Meter>((device) => ({
-      meter_id: device.id,
-      values: [device.value],
-    }));
+    const meters = devices
+      .filter((it) => it.value)
+      .map<Meter>((device) => ({
+        meter_id: device.id,
+        values: [device.value],
+      }));
+
+    await this.databaseService.saveLastReadingMetersDate(account);
 
     return api.sendMeters({ meters });
   }
