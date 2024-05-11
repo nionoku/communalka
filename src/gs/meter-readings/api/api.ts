@@ -38,10 +38,10 @@ export interface Reading {
 }
 
 export interface SendMetersBody {
-  meters: MeterValue[];
+  meters: Meter[];
 }
 
-export interface MeterValue {
+export interface Meter {
   meter_id: string;
   values: number[];
 }

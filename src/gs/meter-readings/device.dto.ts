@@ -1,12 +1,13 @@
-import { MeterValue } from '../api/api';
+import { MeterValue } from './api/api';
 
 export type DeviceDto = {
   id: string;
   serialNumber: string;
   type: '💧' | '♨️' | '❔';
-  currentValue: number;
+  lastValue: number;
   lastReadingDate: Date;
   deltaReading: number;
+  value?: number;
 };
 
 export class Device {
@@ -17,7 +18,7 @@ export class Device {
       id: device.id,
       serialNumber: device.serial_number,
       type: this.castType(device.type),
-      currentValue: device.current_values[0] || 0,
+      lastValue: device.current_values[0] || 0,
       lastReadingDate: new Date(device.last_readings_date),
       deltaReading: Math.ceil(device.average_deltas[0] || 0),
     };

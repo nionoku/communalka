@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Account } from '@prisma/client';
-import { Api, GetMeters } from '../api/api';
-import { Device } from './process.dto';
+import { Api, GetMeters, Meter } from '../api/api';
+import { Device, DeviceDto } from '../device.dto';
 
 @Injectable()
 export class ProcessService {
   constructor() {}
 
-  async listOfDevices(session: Account) {
-    const api = new Api(session.gs_session);
+  async listOfDevices(session: string) {
+    const api = new Api(session);
 
     return (
       api
@@ -20,5 +19,16 @@ export class ProcessService {
         // cast to dto
         .then((devices) => devices.map<Device>((device) => new Device(device)))
     );
+  }
+
+  async sendMeterReadings(devices: DeviceDto[], session: string) {
+    const api = new Api(session);
+
+    const meters = devices.map<Meter>((device) => ({
+      meter_id: device.id,
+      values: [device.value],
+    }));
+
+    return api.sendMeters({ meters });
   }
 }

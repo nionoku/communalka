@@ -4,7 +4,7 @@ import { Action, Command, Ctx, Update } from 'nestjs-telegraf';
 import { Context, Scenes } from 'telegraf';
 import { SESSIONS } from '../../../constants';
 import { ProcessService } from '../process/process.service';
-import { DeviceDto } from '../process/process.dto';
+import { MeterWizardState } from './meter-wizard/meter-wizard.dto';
 
 @Update()
 @Injectable()
@@ -21,7 +21,7 @@ export class BotService {
   @Command('meter')
   async onStartMeterWizard(@Ctx() ctx: Context) {
     await ctx.reply(
-      'Выберите помещение,\nдля которого передать\nпоказания счетчиков',
+      'Выберите помещение, для которого передать\nпоказания счетчиков',
       {
         reply_markup: {
           inline_keyboard: [
@@ -47,7 +47,7 @@ export class BotService {
     this.logger.log(`Start handle meter reading for area ${ctx.match[1]}`);
 
     const devices = await this.processService
-      .listOfDevices(session)
+      .listOfDevices(session.gs_session)
       .then((devices) => devices.map((device) => device.toDto()));
 
     this.logger.log(
@@ -56,6 +56,8 @@ export class BotService {
 
     ctx.scene.enter('meter', {
       devices,
-    } satisfies { devices: DeviceDto[] });
+      // required for send information
+      session: session.gs_session,
+    } satisfies MeterWizardState);
   }
 }

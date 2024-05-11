@@ -1,56 +1,59 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Ctx, Wizard, WizardStep } from 'nestjs-telegraf';
 import { Scenes } from 'telegraf';
-import { DeviceDto } from '../../process/process.dto';
+import { MeterWizardState } from './meter-wizard.dto';
+import { ProcessService } from '../../process/process.service';
+import { DeviceDto } from '../../device.dto';
 
 const USE_MONTH_MIDDLE_VALUE_MESSAGE = '📈Применить среднемесячное потребление';
-
-type DeviceState = DeviceDto & {
-  value?: number;
-};
 
 // TODO (2024.05.11): Replace to scene?
 
 @Injectable()
 @Wizard('meter')
 export class MeterWizardService {
+  constructor(private processService: ProcessService) {}
+
   private readonly logger = new Logger(MeterWizardService.name);
 
   @WizardStep(1)
   private async requestMeterPerEachDevice(@Ctx() ctx: Scenes.WizardContext) {
     this.logger.log(`Start meter reading wizard`);
 
-    // @ts-expect-error devices should be exist
-    const devicesList: DeviceState[] = ctx.scene.state.devices;
+    const state = ctx.scene.state as MeterWizardState;
+    const devicesList: DeviceDto[] = state.devices;
 
     if (!devicesList.length) {
-      this.logger.warn(`Empty list of devices`);
-
       await ctx.reply('Список счетчиков пуст');
       await ctx.scene.leave();
+
+      this.logger.warn(`Empty list of devices`);
+
       return;
     }
 
     // active device is device with empty value
-    const device: DeviceState = devicesList.find(
-      (it) => typeof it.value === 'undefined',
+    const device: DeviceDto = devicesList.find(
+      (it) => typeof it.value !== 'number',
     );
 
     if (!device) {
-      // TODO (2024.05.11): Send meter to server
+      // send meter readings to the server
+      await this.processService.sendMeterReadings(devicesList, state.session);
+
+      // TODO (2024.05.11): Add submit button for process values
+      await ctx.reply('Показания счетчиков приняты и отправлены на обработку');
+      await ctx.scene.leave();
 
       this.logger.log(`All devices handled (${devicesList.length} devices)`);
 
-      await ctx.reply('Показания счетчиков приняты и отправлены на обработку');
-      await ctx.scene.leave();
       return;
     }
 
-    // @ts-expect-error device should be exist
-    ctx.scene.state.device = device;
+    state.currentDevice = device;
     const deviceName = device.type + device.serialNumber;
 
-    this.logger.log(`Handle device: ${deviceName}`);
+    this.logger.log(`Handling device: ${deviceName}`);
 
     const lastReadingDate = Intl.DateTimeFormat('ru', {
       day: 'numeric',
@@ -65,7 +68,7 @@ export class MeterWizardService {
       `Введите показания по счетчику:\n\n` +
         `*${deviceName}*\n\n` +
         `Среднемесячное потребление: _*${device.deltaReading}*_\n` +
-        `Текущее показание счетчика: _*${device.currentValue}*_\n` +
+        `Текущее показание счетчика: _*${device.lastValue}*_\n` +
         `Дата последней сдачи показаний: _*${lastReadingDate}*_`,
       {
         reply_markup: {
@@ -79,6 +82,7 @@ export class MeterWizardService {
         },
       },
     );
+
     ctx.wizard.next();
   }
 
@@ -86,18 +90,34 @@ export class MeterWizardService {
   private async submitMeterPerDeviceInfo(@Ctx() ctx: Scenes.WizardContext) {
     // @ts-expect-error awd
     const value: string = ctx.message.text;
-    // @ts-expect-error device should be exist
-    const device: DeviceState = ctx.scene.state.device;
+
+    const state = ctx.scene.state as MeterWizardState;
+    const device: DeviceDto = state.currentDevice;
 
     if (value === USE_MONTH_MIDDLE_VALUE_MESSAGE) {
-      device.value = device.currentValue + device.deltaReading;
+      device.value = device.lastValue + device.deltaReading;
     } else {
       if (!/\d+/.test(value)) {
-        // TODO (2024.05.10): notify about wring input
-        throw new Error();
+        await ctx.reply(
+          'Показание для счетчика должно быть целым числом, повторите ввод',
+        );
+
+        ctx.wizard.selectStep(1);
+        return;
       }
 
-      device.value = parseInt(value);
+      const parsedValue = parseInt(value);
+
+      if (parsedValue < device.lastValue) {
+        await ctx.replyWithMarkdownV2(
+          `Показание для счетчика должно быть больше или равно текущему значению, текущее значение: _*${device.lastValue}*_`,
+        );
+
+        ctx.wizard.selectStep(1);
+        return;
+      }
+
+      device.value = parsedValue;
     }
 
     this.logger.log(
@@ -105,7 +125,7 @@ export class MeterWizardService {
     );
 
     await ctx.replyWithMarkdownV2(
-      `Показание для счетчика применено, значение: _*${device.value}*_`,
+      `Показание для счетчика применено, значение: _*${device.value}*_, потребление за период: _*${device.value - device.lastValue}*_`,
       {
         reply_markup: {
           remove_keyboard: true,
