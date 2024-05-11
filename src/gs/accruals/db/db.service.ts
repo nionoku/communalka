@@ -22,11 +22,15 @@ export class DbService {
     });
   }
 
-  save(accrual: AccrualDto, area: number) {
+  save(accrual: AccrualDto, sessionId: number) {
     return this.prismaService.gS_Accruals.create({
       data: {
         ...accrual,
-        area,
+        account: {
+          connect: {
+            id: sessionId,
+          },
+        },
       },
     });
   }

@@ -11,10 +11,12 @@ datasource db {
 }
 
 model Account {
-  id         Int    @id @default(autoincrement())
-  area       Int
-  gs_session String
-  notify_to  Int
+  id                Int                 @id @default(autoincrement())
+  area              Int
+  gs_session        String
+  notify_to         Int
+  GS_Accruals       GS_Accruals[]
+  GS_Meters_History GS_Meters_History[]
 }
 
 model GS_Accruals {
@@ -23,7 +25,16 @@ model GS_Accruals {
   status       String // debt | paid
   accrual_date String
   receipt_path String?
-  area         Int
+  account      Account  @relation(fields: [account_id], references: [id])
+  account_id   Int
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
+}
+
+model GS_Meters_History {
+  id         Int      @id @default(autoincrement())
+  account    Account  @relation(fields: [account_id], references: [id])
+  account_id Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

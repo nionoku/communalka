@@ -25,7 +25,7 @@ export class ProcessService {
     );
 
     const tasks = this.sessions.map(
-      async ({ gs_session, area, notify_to }, index) => {
+      async ({ gs_session, id, area, notify_to }, index) => {
         this.logger.log(`Start task for getting accruals for area ${area}`);
 
         const api = new Api(gs_session);
@@ -35,7 +35,7 @@ export class ProcessService {
           const existRecord = await this.databaseService.exist(document);
 
           if (!existRecord) {
-            return this.databaseService.save(document, area);
+            return this.databaseService.save(document, id);
           }
 
           if (existRecord.status !== document.status) {
