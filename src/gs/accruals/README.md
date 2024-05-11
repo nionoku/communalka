@@ -9,4 +9,4 @@
 - [ ] Decode QR and send payment link with notify about debt
 
 ## Variables
-- GS_CHECK_ACCRUALS_EXPRESSION = '0 0 9 * * ?'
+- GS_CHECK_ACCRUALS_EXPRESSION = '0 9 * * *'

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { ProcessService } from '../process/process.service';
+import { GS_CHECK_ACCRUALS_EXPRESSION } from './cron.constants';
 
 @Injectable()
 export class CronService {
@@ -8,7 +9,7 @@ export class CronService {
 
   private readonly logger = new Logger(CronService.name);
 
-  @Cron(CronExpression.EVERY_DAY_AT_NOON)
+  @Cron(GS_CHECK_ACCRUALS_EXPRESSION)
   async checkAccrualsDaily() {
     this.logger.log(`Start daily check accruals cron`);
 
