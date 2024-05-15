@@ -83,7 +83,7 @@ class Api {
   }
 
   sendMeters(values: SendMetersBody) {
-    return this.request('/api/v4/cabinet/meters', {
+    return this.request('/api/v4/cabinet/meters/', {
       method: 'POST',
       body: JSON.stringify(values),
       headers: {

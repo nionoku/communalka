@@ -35,12 +35,28 @@ export class MeterWizardService {
     );
 
     if (!device) {
-      await state.onComplete(devicesList);
-      // TODO (2024.05.11): Add submit button for process values
-      await ctx.reply('Показания счетчиков приняты и отправлены на обработку');
-      await ctx.scene.leave();
+      try {
+        await state.onComplete(devicesList);
 
-      this.logger.log(`All devices handled (${devicesList.length} devices)`);
+        // TODO (2024.05.11): Add submit button for process values
+        await ctx.reply(
+          'Показания счетчиков приняты и отправлены на обработку',
+        );
+
+        this.logger.log(
+          `All devices handled (${devicesList.length} devices), meters sending`,
+        );
+      } catch (err) {
+        await ctx.replyWithMarkdownV2(
+          'Произошла ошибка при отправке показаний счетчиков на обработку:\n\n' +
+            `\`${err.message}\`\n\n` +
+            `Повторите отправку показаний \\(/meter\\) или передайте показания [через сайт](${process.env.GS_BASE_URL})`,
+        );
+
+        this.logger.error(`Error when handle reading meters: ${err.message}`);
+      } finally {
+        await ctx.scene.leave();
+      }
 
       return;
     }

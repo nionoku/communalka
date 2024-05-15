@@ -59,7 +59,7 @@ export class BotService {
 
     ctx.scene.enter('meter', {
       devices,
-      onComplete: (devices) => {
+      onComplete: async (devices) => {
         // send meter readings to the server
         return this.processService.sendMeterReadings(devices, session);
       },
