@@ -1,7 +1,7 @@
 import use from '../../../lib/scope-extensions';
 import { makeCookiesString } from '../../../utils/cookies';
 
-export interface AccuralResponse {
+export interface AccrualResponse {
   accruals: Accrual[];
   debts: Debt[];
   balance: Balance;
@@ -40,12 +40,12 @@ export interface Balance {
   rent: number;
 }
 
-export type GenerateAccuralReceiptResponse = {
+export type GenerateAccrualReceiptResponse = {
   task_id: string;
   sector_code: string;
 };
 
-export type CheckIsGeneratedAccuralReceiptResponse =
+export type CheckIsGeneratedAccrualReceiptResponse =
   | {
       status: 'wip';
     }
@@ -95,8 +95,8 @@ class Api {
     });
   }
 
-  /** @description fetch list of accurals (with debts) */
-  fetchAccurals(from: Date, till: Date) {
+  /** @description fetch list of accruals (with debts) */
+  fetchAccruals(from: Date, till: Date) {
     const query = new URLSearchParams();
     query.set('sectors', 'rent');
     query.set('month_from', makeRequestDate(from));
@@ -107,8 +107,8 @@ class Api {
     });
   }
 
-  /** @description request to creating task for generate accural receipt */
-  fetchGenerateAccuralReceiptById(id: string) {
+  /** @description request to creating task for generate accrual receipt */
+  fetchGenerateAccrualReceiptById(id: string) {
     const body = {
       accrual: id,
       sector_code: 'rent',
@@ -123,8 +123,8 @@ class Api {
     });
   }
 
-  /** @description fetch status of task for generate accural receipt */
-  checkIsGeneratedAccuralReceipt(params: GenerateAccuralReceiptResponse) {
+  /** @description fetch status of task for generate accrual receipt */
+  checkIsGeneratedAccrualReceipt(params: GenerateAccrualReceiptResponse) {
     const query = new URLSearchParams();
     query.set('task_id', params.task_id);
     query.set('sector_code', params.sector_code);
@@ -134,8 +134,8 @@ class Api {
     });
   }
 
-  /** @description fetch link for download generated accural receipt */
-  fetchAccuralReceiptById(id: string, author: string) {
+  /** @description fetch link for download generated accrual receipt */
+  fetchAccrualReceiptById(id: string, author: string) {
     const query = new URLSearchParams();
     query.set('file_id', id);
     query.set('author', author);
