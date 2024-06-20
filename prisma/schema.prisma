@@ -17,6 +17,7 @@ model Account {
   notify_to         Int
   GS_Accruals       GS_Accruals[]
   GS_Meters_History GS_Meters_History[]
+  PESC_Accruals     PESC_Accruals[]
 }
 
 model GS_Accruals {
@@ -37,4 +38,16 @@ model GS_Meters_History {
   account_id Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model PESC_Accruals {
+  id           Int      @id @default(autoincrement())
+  accrual_id   String   @unique
+  status       String // debt | paid
+  accrual_date String
+  receipt_path String?
+  account      Account  @relation(fields: [account_id], references: [id])
+  account_id   Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 }

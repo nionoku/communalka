@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GlobalModule } from './global.module';
 import { session } from 'telegraf';
+import { PescModule } from './pesc/pesc.module';
 
 @Module({
   imports: [
@@ -18,6 +19,8 @@ import { session } from 'telegraf';
     GlobalModule,
 
     GsModule,
+
+    PescModule,
   ],
   controllers: [],
   exports: [],
