@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AccrualDto } from '../accrual.dto';
+import { IAccrualDbService } from 'src/interfaces/accrual-db.interface';
+import { GS_Accruals } from '@prisma/client';
 
 @Injectable()
-export class DbService {
+export class DbService implements IAccrualDbService<AccrualDto, GS_Accruals> {
   constructor(private prismaService: PrismaService) {}
 
   debts() {

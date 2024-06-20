@@ -1,4 +1,4 @@
-import use from '../../../lib/scope-extensions';
+import { format } from 'date-fns';
 import { makeCookiesString } from '../../../utils/cookies';
 
 export interface AccrualResponse {
@@ -58,15 +58,6 @@ type Cookies = {
   session_id: string;
 };
 
-function makeRequestDate(date: Date): string {
-  return use(date)
-    .also((date) => date.setHours(0, 0, 0, 0))
-    .item()
-    .toISOString()
-    .split('.')
-    .at(0) as string;
-}
-
 class Api {
   constructor(private sessionId: string) {}
 
@@ -99,8 +90,8 @@ class Api {
   fetchAccruals(from: Date, till: Date) {
     const query = new URLSearchParams();
     query.set('sectors', 'rent');
-    query.set('month_from', makeRequestDate(from));
-    query.set('month_till', makeRequestDate(till));
+    query.set('month_from', format(from, 'yyyy.MM.dd'));
+    query.set('month_till', format(till, 'yyyy.MM.dd'));
 
     return this.request('/api/v4/cabinet/accruals', {
       query,

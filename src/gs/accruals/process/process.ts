@@ -62,6 +62,7 @@ export class Process {
         accrual_id: document.accrual_id,
         accrual_date: documentDate,
         status: document.status,
+        receipt_path: null,
       };
     }
 
