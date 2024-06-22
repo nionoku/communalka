@@ -13,6 +13,11 @@ export class AccountService {
             GS_Session: true,
           },
         },
+        PESC_Account: {
+          include: {
+            PESC_Session: true,
+          },
+        },
       },
     });
   }

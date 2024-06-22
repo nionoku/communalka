@@ -1,5 +1,7 @@
+import { format } from 'date-fns';
+
 const getDate = (date: Date): string => {
-  return date.toISOString().split('T').at(0);
+  return format(date, 'yyyy-MM-dd');
 };
 
 export { getDate };

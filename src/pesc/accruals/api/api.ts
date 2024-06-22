@@ -12,12 +12,20 @@ export class Api {
     },
   ) {
     const url = new URL(path, process.env.PESC_BASE_URl);
+    const _options = {
+      ...options,
+    };
 
-    if (options.query) {
+    if (_options.query) {
       url.search = options.query.toString();
     }
 
-    return fetch(url, options) as TypedResponse<T>;
+    const headers = new Headers(_options.headers);
+    headers.set('Authorization', `Bearer ${this.token}`);
+
+    _options.headers = headers;
+
+    return fetch(url, _options) as TypedResponse<T>;
   }
 
   /** @description fetch list of bills */
@@ -26,7 +34,7 @@ export class Api {
     query.set('from', format(from, 'dd.MM.yyyy'));
     query.set('to', format(till, 'dd.MM.yyyy'));
 
-    return this.request<string[]>('/v6/bills/payments', { query });
+    return this.request<number[]>('/v6/bills/payments', { query });
   }
 
   /** @description fetch bill by id */

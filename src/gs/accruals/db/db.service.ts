@@ -24,13 +24,13 @@ export class DbService implements IAccrualDbService<AccrualDto, GS_Accruals> {
     });
   }
 
-  save(accrual: AccrualDto, sessionId: number) {
+  save(accrual: AccrualDto, accountId: number) {
     return this.prismaService.gS_Accruals.create({
       data: {
         ...accrual,
         account: {
           connect: {
-            id: sessionId,
+            id: accountId,
           },
         },
       },
