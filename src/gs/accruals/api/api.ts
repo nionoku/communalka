@@ -60,7 +60,7 @@ type Cookies = {
 };
 
 class Api {
-  constructor(private sessionId: string) {}
+  constructor(private token: string) {}
 
   private request<T>(
     path: string,
@@ -75,7 +75,7 @@ class Api {
     }
 
     const cookies = makeCookiesString<Cookies>({
-      session_id: this.sessionId,
+      session_id: this.token,
     });
 
     return fetch(url, {

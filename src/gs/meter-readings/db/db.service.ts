@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Account } from '@prisma/client';
+import { GS_Session } from '@prisma/client';
 
 @Injectable()
 export class DbService {
@@ -23,11 +23,13 @@ export class DbService {
     });
   }
 
-  saveLastReadingMetersDate(account: Account) {
+  async saveLastReadingMetersDate(session: GS_Session) {
     return this.prismaService.gS_Meters_History.create({
       data: {
         account: {
-          connect: account,
+          connect: {
+            id: session.accountId,
+          },
         },
       },
     });

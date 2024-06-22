@@ -4,13 +4,13 @@ import { DbService } from '../db/db.service';
 import { Process } from './process';
 import { BotService } from '../bot/bot.service';
 import { SESSIONS } from '../../../constants';
-import { Account } from '@prisma/client';
+import { AccountWithCredentials } from 'src/account/account.types';
 
 @Injectable()
 export class ProcessService {
   constructor(
     @Inject(SESSIONS)
-    private sessions: Account[],
+    private sessions: AccountWithCredentials[],
 
     private databaseService: DbService,
 
@@ -25,10 +25,10 @@ export class ProcessService {
     );
 
     const tasks = this.sessions.map(
-      async ({ gs_session, id, area, notify_to }, index) => {
+      async ({ id, area, notify_to, GS_Account }, index) => {
         this.logger.log(`Start task for getting accruals for area ${area}`);
 
-        const api = new Api(gs_session);
+        const api = new Api(GS_Account.GS_Session.token);
         const documents = await new Process(api, from, till).start();
 
         const records = documents.map(async (document) => {
