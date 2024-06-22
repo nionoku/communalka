@@ -13,11 +13,40 @@ datasource db {
 model Account {
   id                Int                 @id @default(autoincrement())
   area              Int
-  gs_session        String
   notify_to         Int
+  GS_Account        GS_Account?
+  PESC_Account      PESC_Account?
   GS_Accruals       GS_Accruals[]
   GS_Meters_History GS_Meters_History[]
   PESC_Accruals     PESC_Accruals[]
+}
+
+model GS_Account {
+  id         Int         @id @default(autoincrement())
+  GS_Session GS_Session?
+  account    Account     @relation(fields: [accountId], references: [id])
+  accountId  Int         @unique
+}
+
+model GS_Session {
+  token     String     @unique
+  account   GS_Account @relation(fields: [accountId], references: [id])
+  accountId Int        @unique
+}
+
+model PESC_Account {
+  id           Int           @id @default(autoincrement())
+  creds        String        @unique
+  PESC_Session PESC_Session?
+  account      Account       @relation(fields: [accountId], references: [id])
+  accountId    Int           @unique
+}
+
+model PESC_Session {
+  token     String       @unique
+  expired   DateTime
+  account   PESC_Account @relation(fields: [accountId], references: [id])
+  accountId Int          @unique
 }
 
 model GS_Accruals {
