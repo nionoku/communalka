@@ -5,7 +5,6 @@ import {
   Api,
   AccrualResponse,
   GenerateAccrualReceiptResponse,
-  CheckIsGeneratedAccrualReceiptResponse,
 } from '../api/api';
 import { CropQRCode } from '../usecase/crop-qr-code';
 import { saveFile } from 'src/utils/save-file';
@@ -41,9 +40,8 @@ export class Process {
       );
     }
 
-    const handleAccruals = await (
-      accrualsResponse.json() as Promise<AccrualResponse>
-    )
+    const handleAccruals = await accrualsResponse
+      .json()
       .then((data) => data.accruals)
       .then((accruals) =>
         accruals.map((accrual) => this.handleAccrual(accrual)),
@@ -107,10 +105,7 @@ export class Process {
 
           const response = await this.api
             .checkIsGeneratedAccrualReceipt(receiptTaskInfo)
-            .then(
-              (it) =>
-                it.json() as Promise<CheckIsGeneratedAccrualReceiptResponse>,
-            );
+            .then((it) => it.json());
 
           if (response.status === 'success') {
             const query = new URLSearchParams(response.url.split('?').at(1));
@@ -157,8 +152,8 @@ export class Process {
 
   private async fetchReceiptData(params: URLSearchParams) {
     return this.api.fetchAccrualReceiptById(
-      params.get('file_id') as string,
-      params.get('author') as string,
+      params.get('file_id'),
+      params.get('author'),
     );
   }
 
@@ -175,8 +170,6 @@ export class Process {
 
     return data
       .json()
-      .then((params: GenerateAccrualReceiptResponse) =>
-        this.waitGenerateAccrualReceipt(params),
-      );
+      .then((params) => this.waitGenerateAccrualReceipt(params));
   }
 }

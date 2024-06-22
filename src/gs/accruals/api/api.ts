@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { makeCookiesString } from '../../../utils/cookies';
+import { TypedResponse } from 'src/declarations/typed-response';
 
 export interface AccrualResponse {
   accruals: Accrual[];
@@ -61,7 +62,7 @@ type Cookies = {
 class Api {
   constructor(private sessionId: string) {}
 
-  private request(
+  private request<T>(
     path: string,
     options: RequestInit & {
       query?: URLSearchParams;
@@ -83,7 +84,7 @@ class Api {
         ...options.headers,
         cookie: cookies,
       },
-    });
+    }) as TypedResponse<T>;
   }
 
   /** @description fetch list of accruals (with debts) */
@@ -93,7 +94,7 @@ class Api {
     query.set('month_from', format(from, 'yyyy.MM.dd'));
     query.set('month_till', format(till, 'yyyy.MM.dd'));
 
-    return this.request('/api/v4/cabinet/accruals', {
+    return this.request<AccrualResponse>('/api/v4/cabinet/accruals', {
       query,
     });
   }
@@ -105,13 +106,16 @@ class Api {
       sector_code: 'rent',
     };
 
-    return this.request('/api/v4/cabinet/receipt/', {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'content-type': 'application/json',
+    return this.request<GenerateAccrualReceiptResponse>(
+      '/api/v4/cabinet/receipt/',
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'content-type': 'application/json',
+        },
       },
-    });
+    );
   }
 
   /** @description fetch status of task for generate accrual receipt */
@@ -120,9 +124,12 @@ class Api {
     query.set('task_id', params.task_id);
     query.set('sector_code', params.sector_code);
 
-    return this.request('/api/v4/cabinet/receipt', {
-      query,
-    });
+    return this.request<CheckIsGeneratedAccrualReceiptResponse>(
+      '/api/v4/cabinet/receipt',
+      {
+        query,
+      },
+    );
   }
 
   /** @description fetch link for download generated accrual receipt */

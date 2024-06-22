@@ -1,3 +1,5 @@
-type TypedResponse<T> = Promise<Response & { json: () => Promise<T> }>;
+type TypedResponse<T> = Promise<
+  Omit<Response, 'json'> & { json: () => Promise<T> }
+>;
 
 export { TypedResponse };

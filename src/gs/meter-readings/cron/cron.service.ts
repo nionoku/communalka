@@ -8,7 +8,6 @@ import {
 import { Cron } from '@nestjs/schedule';
 import { Account } from '@prisma/client';
 import { SESSIONS } from '../../../constants';
-import use from '../../../lib/scope-extensions';
 import { DbService } from '../db/db.service';
 
 @Injectable()
@@ -38,11 +37,12 @@ export class CronService {
         .lastReadingMetersDate(session.area)
         .then((data) => data.created_at)
         .then((date) => {
-          const firstDateWhenNotified = use(new Date())
-            .also((date) => {
-              date.setDate(GS_NOTIFICATION_METERS_START_DAY_OF_MONTH);
-            })
-            .item();
+          const firstDateWhenNotified = (() => {
+            const date = new Date();
+            date.setDate(GS_NOTIFICATION_METERS_START_DAY_OF_MONTH);
+
+            return date;
+          })();
 
           return date.getTime() < firstDateWhenNotified.getTime();
         });
