@@ -53,7 +53,8 @@ export class Process {
   private async handleAccrual(
     document: AccrualResponse['accruals'][number],
   ): Promise<AccrualDto> {
-    const documentDate = getDate(new Date(document.month));
+    const documentDate = new Date(document.month);
+    const documentDateString = getDate(new Date(document.month));
 
     if (!document.allow_pdf) {
       return {
@@ -64,11 +65,11 @@ export class Process {
       };
     }
 
-    const receiptPath = `documents/${documentDate}_${document.accrual_id}.pdf`;
-    const qrReceiptPath = `documents-qr/${documentDate}_${document.accrual_id}.png`;
+    const receiptPath = `documents/${documentDateString}_${document.accrual_id}.pdf`;
+    const qrReceiptPath = `documents-qr/${documentDateString}_${document.accrual_id}.png`;
 
     this.logger.log(
-      `Start handle accrual document with id ${document.accrual_id} at ${documentDate}`,
+      `Start handle accrual document with id ${document.accrual_id} at ${documentDateString}`,
     );
 
     try {

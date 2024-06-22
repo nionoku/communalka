@@ -53,7 +53,7 @@ model GS_Accruals {
   id           Int      @id @default(autoincrement())
   accrual_id   String   @unique
   status       String // debt | paid
-  accrual_date String
+  accrual_date DateTime
   receipt_path String?
   account      Account  @relation(fields: [account_id], references: [id])
   account_id   Int
@@ -71,9 +71,9 @@ model GS_Meters_History {
 
 model PESC_Accruals {
   id           Int      @id @default(autoincrement())
-  accrual_id   String   @unique
+  accrual_id   Int      @unique
   status       String // debt | paid
-  accrual_date String
+  accrual_date DateTime
   receipt_path String?
   account      Account  @relation(fields: [account_id], references: [id])
   account_id   Int
