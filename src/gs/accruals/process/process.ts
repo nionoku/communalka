@@ -28,7 +28,7 @@ export class Process {
     till: Date,
   ): Promise<AccrualDto[]> {
     this.logger.log(
-      `Fetching accruals from ${getDate(from)} till ${getDate(till)}`,
+      `Fetching GS accruals from ${getDate(from)} till ${getDate(till)}`,
     );
 
     const accrualsResponse = await this.api.fetchAccruals(from, till);
